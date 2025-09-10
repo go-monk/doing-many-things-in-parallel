@@ -103,6 +103,6 @@ func main() {
 }
 ```
 
-As you can see we don't need a `sync.WaitGroup` counter anymore. That's because we do `n` loops (`for range n`) one more time to receive all the values from the channel `ch`. Unbuffered channels like the one we used are useful not only for sending and receiving values but also for synchronization. Sends and receives block until the other side is ready.
+As you can see we don't need a `sync.WaitGroup` counter anymore. That's because we do `n` loops (`for range n`) one more time to receive all the values from the channel `ch`. This second loop effectively waits for all goroutines to complete - each goroutine sends exactly one value to the channel, so by reading `n` values from the channel, we know that all `n` goroutines have finished their work. The buffered channel (with capacity `n`) ensures that all goroutines can send their results without blocking, even if we haven't started reading from the channel yet.
 
 To learn more about concurrency in Go you can go on a [tour](https://go.dev/tour/concurrency/1) or read a [book](https://www.gopl.io/).
