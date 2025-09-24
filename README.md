@@ -56,6 +56,20 @@ func main() {
 }
 ```
 
+Note that starting from Go 1.25, you can use the new `wg.Go()` to simplify like this:
+
+```go
+func doManyThings(n int) {
+    var wg sync.WaitGroup
+    for range n {
+        wg.Go(func() {      // Go 1.25+: combines Add(1) + go func()
+            doSomething()   // no need for defer wg.Done() - handled automatically
+        })
+    }
+    wg.Wait()
+}
+```
+
 So how long does it take now to do million times something that takes one second? On my laptop it's less than three seconds:
 
 ```sh
