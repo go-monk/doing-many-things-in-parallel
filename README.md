@@ -1,4 +1,4 @@
-Computers (not people!) are very good at doing many things quickly. Very many things and very quickly. For example, here's a function that does something; it sleeps for a second:
+Computers (not people!) are good at doing many things quickly. Very many things and very quickly. For example, here's a function that does something: it sleeps for a second:
 
 ```go
 func doSomething() {
@@ -6,7 +6,9 @@ func doSomething() {
 }
 ```
 
-When you want to do something many times you can do it like this:
+## Doing many things
+
+When you want to do something `n` times you can do it like this:
 
 ```go
 func doManyThings(n int) {
@@ -28,11 +30,13 @@ $ time go run main.go
 real    0m10.256s
 ```
 
-As expected, around 10 seconds ... What if we wanted to do this something a million times? That would take million seconds which is almost a dozen of days. What is this, computers are supposed to be fast!
+As expected, around 10 seconds ... What if we wanted to do this something a million times? That would take at least a million seconds which is almost a dozen of days. Wait, what is this, computers are supposed to be fast!
 
-You can make them faster by programming them to do things concurrently, i.e. not sequentially (one after another) as above. And if you have multiple CPUs (which nowadays you almost certainly have) these things are done in parallel (definitely something a man should not try to simulate)!
+## Doing many things fast
 
-You can run many things in Go concurrently like this:
+You can make them faster by programming them to do things concurrently instead of sequentially - one after another - as above. And if you have multiple CPUs (which nowadays you almost certainly have) these things are done in parallel (definitely something a man should not try to simulate - read Johann Hari's book Lost Focus to learn more)!
+
+You can run many things in Go concurrently by spawning new **goroutines** like this:
 
 ```go
 func doManyThings(n int) {
@@ -62,9 +66,12 @@ real    0m2.667s
 
 That's much faster then twelve days!
 
-When doing something we often want to see some output. If nothing else we want to at least know whether the task was done without problems:
+## Doing many things producing output fast
+
+When doing something we often want to see some output. If nothing else we at least want to know whether the task was done without problems:
 
 ```go
+// Now doSomething returns an error value. It's nil when all is good.
 func doSomething() error {
     time.Sleep(time.Second)
     if rand.Intn(100) == 0 { // circa one percent of tasks will fail
@@ -74,7 +81,7 @@ func doSomething() error {
 }
 ```
 
-Now, how do we get output from tasks being concurrently executing on goroutines? For this we use channels:
+Now, how do we get output from tasks being concurrently executing on goroutines? For this we use **channels**:
 
 ```go
 func doManyThings(n int) []error {
@@ -103,6 +110,6 @@ func main() {
 }
 ```
 
-As you can see we don't need a `sync.WaitGroup` counter anymore. That's because we do `n` loops (`for range n`) one more time to receive all the values from the channel `ch`. This second loop effectively waits for all goroutines to complete - each goroutine sends exactly one value to the channel, so by reading `n` values from the channel, we know that all `n` goroutines have finished their work. The buffered channel (with capacity `n`) ensures that all goroutines can send their results without blocking, even if we haven't started reading from the channel yet.
+As you can see we don't need a `sync.WaitGroup` counter anymore. That's because we do `n` loops (via `for range n`) one more time to receive all the values from the channel `ch`. This second loop effectively waits for all goroutines to complete - each goroutine sends exactly one value to the channel, so by reading `n` values from the channel, we know that all `n` goroutines have finished their work. The buffered channel (with capacity `n`) ensures that all goroutines can send their results without blocking, even if we haven't started reading from the channel yet.
 
 To learn more about concurrency in Go you can go on a [tour](https://go.dev/tour/concurrency/1) or read a [book](https://www.gopl.io/).
